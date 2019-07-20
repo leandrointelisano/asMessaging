@@ -5,5 +5,5 @@ import spark.Request
 import spark.Response
 
 class LogInController ( private val logInService: LogInService){
-    fun userLogIn(req: Request, res: Response)
+
 }

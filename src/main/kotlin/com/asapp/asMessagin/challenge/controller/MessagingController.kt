@@ -36,7 +36,3 @@ class MessagingController(
 
         }
 }
-
-data class DeliverableMessage(
-    val
-)
