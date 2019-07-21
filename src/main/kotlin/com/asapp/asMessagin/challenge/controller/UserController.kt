@@ -10,15 +10,14 @@ import spark.Response
 
 class UserController(private val userService: UserService, private val objectMapper: ObjectMapper) {
     fun createUser() = { req: Request, response: Response ->
-
-
         try {
             objectMapper.readValue<UserPostRequest>(req.body(), UserPostRequest::class.java)
 
         } catch (e: Exception) {
             throw BadRequestException("Invalid request body")
+
         }?.let { user ->
-            userService.create(user)
+            userService.create(user).let { objectMapper.writeValueAsString(it) }
         }
 
 

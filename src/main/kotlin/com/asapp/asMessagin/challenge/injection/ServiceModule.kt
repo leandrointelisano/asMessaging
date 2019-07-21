@@ -1,6 +1,7 @@
 package com.asapp.asMessagin.challenge.injection
 
-import com.asapp.asMessagin.challenge.persistence.MessagePersistence
+import com.asapp.asMessagin.challenge.persistence.UserPersistence
+import com.asapp.asMessagin.challenge.service.LogInService
 import com.asapp.asMessagin.challenge.service.UserService
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
@@ -13,8 +14,16 @@ class ServiceModule : AbstractModule() {
     @Provides
     @Singleton
     fun userService(
-        persistence: MessagePersistence
+        persistence: UserPersistence
     ): UserService = UserService(
+        persistence
+    )
+
+    @Provides
+    @Singleton
+    fun logInService(
+        persistence: UserPersistence
+    ): LogInService = LogInService(
         persistence
     )
 }

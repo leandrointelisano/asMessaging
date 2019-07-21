@@ -1,8 +1,9 @@
+import com.asapp.asMessagin.challenge.controller.ExceptionHandler
 import com.asapp.asMessagin.challenge.controller.Routes
 import com.asapp.asMessagin.challenge.injection.ControllerModule
 import com.asapp.asMessagin.challenge.injection.HttpModule
 import com.asapp.asMessagin.challenge.injection.ServiceModule
-import com.asapp.asMessagin.challenge.persistence.MessagePersistence
+import com.asapp.asMessagin.challenge.persistence.UserPersistence
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Key
@@ -38,7 +39,7 @@ class Main {
     fun run() {
         Database.connect("jdbc:sqlite:./data.db", "org.sqlite.JDBC")
 
-        transaction { SchemaUtils.create(MessagePersistence.Users, MessagePersistence.Messages, MessagePersistence.UserLogin) }
+        transaction { SchemaUtils.create(UserPersistence.Users, UserPersistence.Messages, UserPersistence.UserLogin) }
 
         val injector = Guice.createInjector(
             HttpModule(),
@@ -80,6 +81,7 @@ class Main {
 
         override fun init() {
             injector.getInstance(Routes::class.java).register()
+            injector.getInstance(ExceptionHandler::class.java).register()
         }
     }
 

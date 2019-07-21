@@ -8,3 +8,8 @@ data class UserPostRequest (
 data class User (
     val id: Int
 )
+
+data class LoggedUser(
+    val id: Int,
+    val token: String
+)
