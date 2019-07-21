@@ -46,11 +46,11 @@ interface MessageContent
 interface MediaContent : MessageContent {
     val height: Int
     val width: Int
-    val url: Int
+    val url: String
 }
 
 data class TextContent(val text: String) : MessageContent
 
-data class ImageContent(override val height: Int, override val width: Int, override val url: Int) : MediaContent
+data class ImageContent(override val height: Int, override val width: Int, override val url: String) : MediaContent
 
-data class VideoContent(override val height: Int, override val width: Int, override val url: Int) : MediaContent
+data class VideoContent(override val height: Int, override val width: Int, override val url: String) : MediaContent

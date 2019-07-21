@@ -4,6 +4,7 @@ import com.asapp.asMessagin.challenge.exception.UserNotLoggedException
 import com.asapp.asMessagin.challenge.model.MessageContent
 import com.asapp.asMessagin.challenge.model.UserMessage
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.lang3.RandomStringUtils
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
@@ -50,16 +51,19 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
 
     fun healthy(): Boolean =
         transaction {
-           exec("SELECT 1")
+            exec("SELECT 1")
         }.let { true }
 
     fun createUser(username: String, password: String): Int =
         transaction {
-            User.new {
-                this.username = username
-                this.password = password
+            user(username, password)?.let { user -> (user.username == username).takeIf { it }?.let { user.id.value } }
+                ?: User.new {
+                    this.username = username
+                    this.password = DigestUtils.shaHex(password)
 
-            }.id.value
+                }.id.value
+
+
         }
 
     private fun user(userId: Int) =
@@ -68,7 +72,7 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
     private fun user(username: String, password: String) =
         User.find {
             (Users.username eq username) and
-                    (Users.password eq password)
+                    (Users.password eq DigestUtils.shaHex(password))
         }.firstOrNull()
 
     private fun alreadyLoggedUser(userId: Int): LoggedUser? =
@@ -114,7 +118,7 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
 
     object Users : IntIdTable() {
         val username = varchar("username", 50).uniqueIndex()
-        val password = varchar("password", length = 16)
+        val password = varchar("password", length = 100)
     }
 
 
