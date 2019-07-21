@@ -1,6 +1,7 @@
 package com.asapp.asMessagin.challenge.injection
 
 import com.asapp.asMessagin.challenge.controller.*
+import com.asapp.asMessagin.challenge.persistence.UserPersistence
 import com.asapp.asMessagin.challenge.service.AuthenticationService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -16,16 +17,16 @@ class HttpModule : AbstractModule() {
     @Singleton
     fun routesRegister(
         userController: UserController,
-        mapper: KotlinModule,
         authenticationController: AuthenticationController,
         requestFilter: RequestFilter,
-        messagingController: MessagingController
+        messagingController: MessagingController,
+        appController: AppController
     ): Routes = Routes(
         authenticationController,
         userController,
-        ObjectMapper().registerModule(mapper),
         requestFilter,
-        messagingController
+        messagingController,
+        appController
     )
 
     @Provides
@@ -43,6 +44,16 @@ class HttpModule : AbstractModule() {
         mapper: KotlinModule
     ): RequestFilter = RequestFilter(
         authenticationService,
+        ObjectMapper().registerModule(mapper)
+    )
+
+    @Provides
+    @Singleton
+    fun appController(
+        mapper: KotlinModule,
+        userPersistence: UserPersistence
+    ): AppController = AppController(
+        userPersistence,
         ObjectMapper().registerModule(mapper)
     )
 }

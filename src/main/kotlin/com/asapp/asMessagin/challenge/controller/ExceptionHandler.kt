@@ -1,6 +1,5 @@
 package com.asapp.asMessagin.challenge.controller
 
-import com.asapp.asMessagin.challenge.exception.APIException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER
 import org.eclipse.jetty.http.HttpStatus

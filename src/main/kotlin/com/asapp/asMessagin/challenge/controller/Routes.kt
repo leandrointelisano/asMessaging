@@ -1,16 +1,16 @@
 package com.asapp.asMessagin.challenge.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import spark.Spark.*
 
 class Routes(
     private val authenticationController: AuthenticationController,
     private val userController: UserController,
-    private val objectMapper: ObjectMapper,
     private val requestFilter: RequestFilter,
-    private val messagingController: MessagingController
+    private val messagingController: MessagingController,
+    private val appController: AppController
 ) {
     fun register() {
+        post("/check", appController.healthCheck())
         post("/users", userController.createUser())
         post("/login", authenticationController.login())
         post("/logout", authenticationController.logout())

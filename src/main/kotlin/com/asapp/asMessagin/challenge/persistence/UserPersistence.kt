@@ -9,10 +9,7 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.IntIdTable
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.SizedIterable
-import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
@@ -51,6 +48,10 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
             }
         }
 
+    fun healthy(): Boolean =
+        transaction {
+           exec("SELECT 1")
+        }.let { true }
 
     fun createUser(username: String, password: String): Int =
         transaction {
