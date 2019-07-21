@@ -1,9 +1,7 @@
 package com.asapp.asMessagin.challenge.controller
 
 import com.asapp.asMessagin.challenge.exception.BadRequestException
-import com.asapp.asMessagin.challenge.model.MessageContent
-import com.asapp.asMessagin.challenge.model.User
-import com.asapp.asMessagin.challenge.model.UserMessage
+import com.asapp.asMessagin.challenge.model.UserMessagePost
 import com.asapp.asMessagin.challenge.service.MessagingService
 import com.fasterxml.jackson.databind.ObjectMapper
 import spark.Request
@@ -22,17 +20,16 @@ class MessagingController(
 
     fun sendMessage() =
         { req: Request, response: Response ->
-            {
-                try {
-                    objectMapper.readValue<UserMessage>(req.body(), UserMessage::class.java)
+            try {
+                objectMapper.readValue<UserMessagePost>(req.body(), UserMessagePost::class.java)
 
-                } catch (e: Exception) {
-                    throw BadRequestException("Invalid request body")
-                }?.let { message ->
-                    messagingService.sendMessage(message)
+            } catch (e: Exception) {
+                throw BadRequestException("Invalid request body while sending message")
+            }?.let { message ->
+                messagingService.sendMessage(message).let { objectMapper.writeValueAsString(it) }
 
-                }
             }
+
 
         }
 }

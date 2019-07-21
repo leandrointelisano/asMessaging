@@ -11,3 +11,8 @@ class UserNotLoggedException(
     message: String,
     cause: Throwable? = null
 ) : APIException(HttpStatus.CONFLICT_409, message, cause)
+
+class UnauthorizedException(
+    message: String,
+    cause: Throwable? = null
+) : APIException(HttpStatus.UNAUTHORIZED_401, message, cause)

@@ -1,9 +1,7 @@
 package com.asapp.asMessagin.challenge.injection
 
-import com.asapp.asMessagin.challenge.controller.ExceptionHandler
-import com.asapp.asMessagin.challenge.controller.LogInController
-import com.asapp.asMessagin.challenge.controller.Routes
-import com.asapp.asMessagin.challenge.controller.UserController
+import com.asapp.asMessagin.challenge.controller.*
+import com.asapp.asMessagin.challenge.service.AuthenticationService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.inject.AbstractModule
@@ -19,12 +17,15 @@ class HttpModule : AbstractModule() {
     fun routesRegister(
         userController: UserController,
         mapper: KotlinModule,
-        logInController: LogInController
+        authenticationController: AuthenticationController,
+        requestFilter: RequestFilter,
+        messagingController: MessagingController
     ): Routes = Routes(
-        logInController,
+        authenticationController,
         userController,
-        ObjectMapper().registerModule(mapper)
-
+        ObjectMapper().registerModule(mapper),
+        requestFilter,
+        messagingController
     )
 
     @Provides
@@ -32,6 +33,16 @@ class HttpModule : AbstractModule() {
     fun exceptionHandler(
         mapper: KotlinModule
     ): ExceptionHandler = ExceptionHandler(
+        ObjectMapper().registerModule(mapper)
+    )
+
+    @Provides
+    @Singleton
+    fun requestFilter(
+        authenticationService: AuthenticationService,
+        mapper: KotlinModule
+    ): RequestFilter = RequestFilter(
+        authenticationService,
         ObjectMapper().registerModule(mapper)
     )
 }

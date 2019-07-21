@@ -4,7 +4,7 @@ import com.asapp.asMessagin.challenge.model.LoggedUser
 import com.asapp.asMessagin.challenge.model.UserPostRequest
 import com.asapp.asMessagin.challenge.persistence.UserPersistence
 
-class LogInService(private val userPersistence: UserPersistence) {
+class AuthenticationService(private val userPersistence: UserPersistence) {
 
     fun loginUser(user: UserPostRequest) =
         userPersistence.logUser(user.username, user.password)?.let { loggedUser ->
@@ -16,6 +16,10 @@ class LogInService(private val userPersistence: UserPersistence) {
 
     fun logoutUser(user: UserPostRequest) =
             userPersistence.logoutUser(user.username, user.password)
+
+    fun validToken(token: String, userId: Int): Boolean =
+        userPersistence.validToken(token, userId)
+
 
 
 }

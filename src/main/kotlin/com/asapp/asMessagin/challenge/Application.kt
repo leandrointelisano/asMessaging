@@ -2,6 +2,7 @@ import com.asapp.asMessagin.challenge.controller.ExceptionHandler
 import com.asapp.asMessagin.challenge.controller.Routes
 import com.asapp.asMessagin.challenge.injection.ControllerModule
 import com.asapp.asMessagin.challenge.injection.HttpModule
+import com.asapp.asMessagin.challenge.injection.PersistenceModule
 import com.asapp.asMessagin.challenge.injection.ServiceModule
 import com.asapp.asMessagin.challenge.persistence.UserPersistence
 import com.google.inject.Guice
@@ -44,7 +45,8 @@ class Main {
         val injector = Guice.createInjector(
             HttpModule(),
             ControllerModule(),
-            ServiceModule()
+            ServiceModule(),
+            PersistenceModule()
         )
 
         val handler = ServletContextHandler().apply {

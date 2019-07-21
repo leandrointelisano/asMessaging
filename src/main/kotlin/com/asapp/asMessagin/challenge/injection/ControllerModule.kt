@@ -1,8 +1,10 @@
 package com.asapp.asMessagin.challenge.injection
 
-import com.asapp.asMessagin.challenge.controller.LogInController
+import com.asapp.asMessagin.challenge.controller.AuthenticationController
+import com.asapp.asMessagin.challenge.controller.MessagingController
 import com.asapp.asMessagin.challenge.controller.UserController
-import com.asapp.asMessagin.challenge.service.LogInService
+import com.asapp.asMessagin.challenge.service.AuthenticationService
+import com.asapp.asMessagin.challenge.service.MessagingService
 import com.asapp.asMessagin.challenge.service.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -19,7 +21,7 @@ class ControllerModule : AbstractModule() {
     fun userController(
         userService: UserService,
         mapper: KotlinModule
-        ): UserController = UserController(
+    ): UserController = UserController(
         userService,
         ObjectMapper().registerModule(mapper)
 
@@ -27,11 +29,21 @@ class ControllerModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun logInController(
-        logInService: LogInService,
+    fun authenticationController(
+        authenticationService: AuthenticationService,
         mapper: KotlinModule
-    ): LogInController = LogInController(
-        logInService,
+    ): AuthenticationController = AuthenticationController(
+        authenticationService,
+        ObjectMapper().registerModule(mapper)
+    )
+
+    @Provides
+    @Singleton
+    fun messagingController(
+        messagingService: MessagingService,
+        mapper: KotlinModule
+    ): MessagingController = MessagingController(
+        messagingService,
         ObjectMapper().registerModule(mapper)
     )
 
