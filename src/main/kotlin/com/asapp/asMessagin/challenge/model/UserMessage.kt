@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UserMessage(
-    val sender: User? = null,
-    val recipient: User? = null,
-    val content: MessageContent? = null,
     val id: Int,
+    val sender: Int? = null,
+    val recipient: Int? = null,
+    val content: MessageContent? = null,
     val timestamp: String
 
 )

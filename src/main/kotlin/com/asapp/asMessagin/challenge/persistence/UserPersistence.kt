@@ -2,8 +2,6 @@ package com.asapp.asMessagin.challenge.persistence
 
 import com.asapp.asMessagin.challenge.exception.UserNotLoggedException
 import com.asapp.asMessagin.challenge.model.MessageContent
-import com.asapp.asMessagin.challenge.model.TextContent
-import com.asapp.asMessagin.challenge.model.User
 import com.asapp.asMessagin.challenge.model.UserMessage
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.RandomStringUtils
@@ -17,7 +15,6 @@ import org.jetbrains.exposed.sql.SizedIterable
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
-import java.util.*
 
 class UserPersistence(private val objectMapper: ObjectMapper) {
 
@@ -30,6 +27,7 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
                 recipient = recipientUser
                 content = messageContent
                 timestamp = Instant.now().toString()
+                messageNumber = countUserMessages(messageRecipient) + 1
             }
                 .let {
                     UserMessage(
@@ -44,9 +42,9 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
         transaction {
             Message.find { Messages.recipient eq userId }.limitMessages(from, to).map { persistedMessage ->
                 UserMessage(
-                    sender = com.asapp.asMessagin.challenge.model.User(persistedMessage.id.value),
-                    id = persistedMessage.id.value,
-                    recipient = com.asapp.asMessagin.challenge.model.User(persistedMessage.recipient.id.value),
+                    id = persistedMessage.messageNumber,
+                    sender = persistedMessage.sender.id.value,
+                    recipient = persistedMessage.recipient.id.value,
                     content = objectMapper.readValue(persistedMessage.content, MessageContent::class.java),
                     timestamp = persistedMessage.timestamp
                 )
@@ -63,7 +61,7 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
             }.id.value
         }
 
-    fun user(userId: Int) =
+    private fun user(userId: Int) =
         transaction { User[userId] }
 
     private fun user(username: String, password: String) =
@@ -105,6 +103,14 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
 
     }
 
+    /*
+    4 Bytes long for address 2,147,483,647 messages (Java Integer range is lower than SQL Lite Integer that uses up to 8 Bytes)
+     */
+    private fun countUserMessages(userId: Int): Int =
+        transaction {
+            Message.find { Messages.recipient eq userId }.count()
+        }
+
     object Users : IntIdTable() {
         val username = varchar("username", 50).uniqueIndex()
         val password = varchar("password", length = 16)
@@ -116,6 +122,7 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
         val sender = reference("sender", Users)
         val content = varchar("content", length = 200)
         val timestamp = varchar("timestamp", length = 30)
+        val messageNumber = integer("message_number")
     }
 
     object UserLogin : IntIdTable() {
@@ -137,6 +144,7 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
         var sender by User referencedOn Messages.sender
         var content by Messages.content
         var timestamp by Messages.timestamp
+        var messageNumber by Messages.messageNumber
     }
 
     class LoggedUser(id: EntityID<Int>) : IntEntity(id) {
@@ -167,7 +175,8 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
             LoggedUser.find { (UserLogin.token eq token) }
                 .firstOrNull()
                 ?.validateSenderUser(userId)
-                ?.let { true } ?: false
+                ?.let { it } ?: false
+
         }
 
 
@@ -175,10 +184,11 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
 
 private fun SizedIterable<UserPersistence.Message>.limitMessages(from: Int, to: Int?): List<UserPersistence.Message> =
     this.takeIf { !it.empty() }
-        .let { messages -> to?.let { messages?.filter { message -> message.id.value in from..to } } } ?: this.toList()
+        .let { messages -> to?.let { messages?.filter { message -> message.messageNumber in from..to } } }
+        ?: this.filter { it.messageNumber >= from }.toList()
 
 
 private fun UserPersistence.LoggedUser?.validateSenderUser(userId: Int): Boolean =
-    this?.id?.value?.equals(userId) ?: false
+    this?.userId?.id?.value?.equals(userId) ?: false
 
 

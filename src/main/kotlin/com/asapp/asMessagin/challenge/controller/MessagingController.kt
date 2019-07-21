@@ -10,19 +10,20 @@ import spark.Response
 class MessagingController(
     private val messagingService: MessagingService, private val objectMapper: ObjectMapper
 ) {
-    fun messagesFromUser() = { req: Request, response: Response ->
-        {
-            val recipient: String = requireNotNull(req.queryParams("recipient")) { "'recipient' param is required" }
-            val locale: String = requireNotNull(req.queryParams("recipient")) { "'recipient' param is required" }
+    fun messagesFromUser() = { req: Request, _: Response ->
 
-        }
+        val recipient: Int = requireNotNull(req.queryParams("recipient").toInt()) { "'recipient' param is required" }
+        val start: Int = requireNotNull(req.queryParams("start").toInt()) { "'start' param is required" }
+        val limit: Int? = req.queryMap().hasKey("limit").takeIf { it }?.let { req.queryParams("limit").toInt() }
+        objectMapper.writeValueAsString(messagingService.messages(recipient, start, limit))
+
+
     }
 
     fun sendMessage() =
-        { req: Request, response: Response ->
+        { req: Request, _: Response ->
             try {
                 objectMapper.readValue<UserMessagePost>(req.body(), UserMessagePost::class.java)
-
             } catch (e: Exception) {
                 throw BadRequestException("Invalid request body while sending message")
             }?.let { message ->

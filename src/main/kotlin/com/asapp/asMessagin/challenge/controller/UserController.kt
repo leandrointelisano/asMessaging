@@ -9,7 +9,7 @@ import spark.Request
 import spark.Response
 
 class UserController(private val userService: UserService, private val objectMapper: ObjectMapper) {
-    fun createUser() = { req: Request, response: Response ->
+    fun createUser() = { req: Request, _: Response ->
         try {
             objectMapper.readValue<UserPostRequest>(req.body(), UserPostRequest::class.java)
 

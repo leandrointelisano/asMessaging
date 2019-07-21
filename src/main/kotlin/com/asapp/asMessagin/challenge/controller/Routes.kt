@@ -14,18 +14,10 @@ class Routes(
         post("/users", userController.createUser())
         post("/login", authenticationController.login())
         post("/logout", authenticationController.logout())
-        //before("/messages", requestFilter.handleToken())
+        before("/messages", requestFilter.handleToken())
         post("/messages", messagingController.sendMessage())
+        get("/messages", messagingController.messagesFromUser())
     }
 
-    /*
-    fun handleUserAuthToken() = Filter { req, _ ->
-
-        val authenticationToken =
-            requireNotNull(req.headers("token")) { "'token' header is required" }
-        authenticationController.authenticateUser(authenticationToken)
-
-
-    } */
 
 }
