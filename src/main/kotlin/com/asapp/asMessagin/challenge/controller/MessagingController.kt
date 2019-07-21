@@ -7,15 +7,25 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import spark.Request
 import spark.Response
 
+/**
+ * @class {MessagingController}
+ * It handles all the messages request, sending and receiving messages from a particular user.
+ * It connects the MessagingService with its route
+ * @throws BadRequestException when request body does not fit the correct object or when a query parameter is missing
+ */
 class MessagingController(
     private val messagingService: MessagingService, private val objectMapper: ObjectMapper
 ) {
     fun messagesFromUser() = { req: Request, _: Response ->
-
-        val recipient: Int = requireNotNull(req.queryParams("recipient").toInt()) { "'recipient' param is required" }
-        val start: Int = requireNotNull(req.queryParams("start").toInt()) { "'start' param is required" }
-        val limit: Int? = req.queryMap().hasKey("limit").takeIf { it }?.let { req.queryParams("limit").toInt() }
-        objectMapper.writeValueAsString(messagingService.messages(recipient, start, limit))
+        try {
+            val recipient: Int =
+                requireNotNull(req.queryParams("recipient").toInt()) { "'recipient' param is required" }
+            val start: Int = requireNotNull(req.queryParams("start").toInt()) { "'start' param is required" }
+            val limit: Int? = req.queryMap().hasKey("limit").takeIf { it }?.let { req.queryParams("limit").toInt() }
+            objectMapper.writeValueAsString(messagingService.messages(recipient, start, limit))
+        } catch (e: Exception) {
+            throw BadRequestException("Missing or invalid parameter: ${e.message}", e)
+        }
 
 
     }

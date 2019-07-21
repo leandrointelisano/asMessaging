@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
+/**
+ * Message Content data models and Jackson anootations for parsing
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UserMessage(
     val id: Int,

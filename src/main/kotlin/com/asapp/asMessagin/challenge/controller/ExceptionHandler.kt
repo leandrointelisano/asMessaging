@@ -10,6 +10,12 @@ import spark.ExceptionHandler
 import java.lang.IllegalArgumentException
 import java.util.logging.Level
 
+/**
+ * @class {ExceptionHandler}
+ * Handles the @class {APIException} {IllegalArgumentException} and {InvalidFormatException} exceptions and
+ * uses a custom way of handling them, showing in the response body the message of the exception
+ * and preventing the server from a 500 server error
+ */
 class ExceptionHandler(private val objectMapper: ObjectMapper) {
 
     fun register() {

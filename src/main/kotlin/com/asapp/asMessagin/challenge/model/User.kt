@@ -1,5 +1,8 @@
 package com.asapp.asMessagin.challenge.model
 
+/**
+ * User data models
+ */
 data class UserPostRequest (
     val username: String,
     val password: String

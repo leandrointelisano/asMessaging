@@ -23,13 +23,15 @@ import spark.servlet.SparkApplication
 import spark.servlet.SparkFilter
 import javax.servlet.FilterConfig
 
-
+/**
+ * Main App class. It registers the Exception handlers, Inject the dependencies, connects the DB and starts up the Jetty server
+ */
 class Main {
 
     companion object {
 
         private val LOGGER = LoggerFactory.getLogger(Main::class.java)
-        private val CONTEXT_PATH = "/"
+        private const val CONTEXT_PATH = "/"
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -54,7 +56,7 @@ class Main {
             gzipHandler = GzipHandler()
             listOf(
                 FilterHolder(AppFilter(injector))
-            ).forEach({ h -> addFilter(h, "*", null) })
+            ).forEach { h -> addFilter(h, "*", null) }
 
         }
 
@@ -86,10 +88,6 @@ class Main {
             injector.getInstance(ExceptionHandler::class.java).register()
         }
     }
-
-    private fun Injector.jettyExecutorInstance() =
-        getInstance(Key.get(QueuedThreadPool::class.java, Names.named("jettyExecutor")))
-
 
 
 }

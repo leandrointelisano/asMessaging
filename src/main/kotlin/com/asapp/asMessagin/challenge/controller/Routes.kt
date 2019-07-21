@@ -2,6 +2,10 @@ package com.asapp.asMessagin.challenge.controller
 
 import spark.Spark.*
 
+/**
+ * @class @Routes registers all available endpoints and wire them with each controller.
+ * Also registers the token Filter before each Message endpoint operation
+ */
 class Routes(
     private val authenticationController: AuthenticationController,
     private val userController: UserController,

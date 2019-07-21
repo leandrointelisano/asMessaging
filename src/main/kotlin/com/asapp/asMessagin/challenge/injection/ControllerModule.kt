@@ -12,6 +12,9 @@ import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
 
+/**
+ * Spark class used for injection of dependencies
+ */
 class ControllerModule : AbstractModule() {
 
     override fun configure() {}

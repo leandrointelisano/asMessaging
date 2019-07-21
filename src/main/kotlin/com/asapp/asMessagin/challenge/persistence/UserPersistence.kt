@@ -1,6 +1,6 @@
 package com.asapp.asMessagin.challenge.persistence
 
-import com.asapp.asMessagin.challenge.exception.UserNotLoggedException
+import com.asapp.asMessagin.challenge.exception.UserLogException
 import com.asapp.asMessagin.challenge.model.MessageContent
 import com.asapp.asMessagin.challenge.model.UserMessage
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,6 +14,9 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
+/**
+ * Persistence class that handles all the request from the services. It persists all the user data.
+ */
 class UserPersistence(private val objectMapper: ObjectMapper) {
 
     fun persistMessage(messageSender: Int, messageRecipient: Int, messageContent: String) =
@@ -96,7 +99,7 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
                     token = it.token
                 )
             }
-                ?: throw UserNotLoggedException("Failed to authenticate user: $username. \n Please try with another credentials.")
+                ?: throw UserLogException("Failed to authenticate user: $username. \n Please try with another credentials.")
         }
 
     fun logoutUser(username: String, password: String) {
@@ -114,6 +117,17 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
     private fun countUserMessages(userId: Int): Int =
         transaction {
             Message.find { Messages.recipient eq userId }.count()
+        }
+
+
+    fun validToken(token: String, userId: Int): Boolean =
+        transaction {
+            val user = user(userId)
+            LoggedUser.find { (UserLogin.token eq token) }
+                .firstOrNull()
+                ?.validateSenderUser(userId)
+                ?.let { it } ?: false
+
         }
 
     object Users : IntIdTable() {
@@ -163,28 +177,6 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
         val userId: Int,
         val token: String
     )
-
-
-    fun dbInit() {
-
-        Database.connect("jdbc:sqlite:/resources/data.db", "org.sqlite.JDBC")
-
-        transaction { SchemaUtils.create(Users, Messages, UserLogin) }
-
-
-    }
-
-    fun validToken(token: String, userId: Int): Boolean =
-        transaction {
-            val user = user(userId)
-            LoggedUser.find { (UserLogin.token eq token) }
-                .firstOrNull()
-                ?.validateSenderUser(userId)
-                ?.let { it } ?: false
-
-        }
-
-
 }
 
 private fun SizedIterable<UserPersistence.Message>.limitMessages(from: Int, to: Int?): List<UserPersistence.Message> =

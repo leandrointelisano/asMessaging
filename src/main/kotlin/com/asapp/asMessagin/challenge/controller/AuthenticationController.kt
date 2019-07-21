@@ -7,27 +7,33 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import spark.Request
 import spark.Response
 
-class AuthenticationController(private val authenticationService: AuthenticationService, private val objectMapper: ObjectMapper) {
+/**
+ * @class {com.asapp.asMessagin.challenge.controller.AuthenticationController}
+ * Handles the logIn and logOut requests. It connects the service with its route.
+ * @throws {BadRequestException} when request body does not fit the correct object
+ */
+class AuthenticationController(
+    private val authenticationService: AuthenticationService,
+    private val objectMapper: ObjectMapper
+) {
     fun login() = { req: Request, res: Response ->
         try {
             objectMapper.readValue<UserPostRequest>(req.body(), UserPostRequest::class.java)
         } catch (e: Exception) {
-            throw BadRequestException("Invalid request body")
+            throw BadRequestException("Invalid request body when logging in")
         }.let { user ->
             authenticationService.loginUser(user).let { objectMapper.writeValueAsString(it) }
         }
 
 
-
     }
 
-    fun logout() = {
-        req: Request, res: Response ->
+    fun logout() = { req: Request, res: Response ->
         try {
             objectMapper.readValue<UserPostRequest>(req.body(), UserPostRequest::class.java)
-        }catch (e: Exception){
+        } catch (e: Exception) {
             throw BadRequestException("Invalid request body when logging out")
-        }.let { user->
+        }.let { user ->
             authenticationService.logoutUser(user).let { objectMapper.writeValueAsString(it) }
         }
     }
