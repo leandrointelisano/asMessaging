@@ -18,9 +18,14 @@ class Routes(
         post("/users", userController.createUser())
         post("/login", authenticationController.login())
         post("/logout", authenticationController.logout())
-        before("/messages", requestFilter.handleToken())
+
+        before("messages\b",requestFilter.handleTokenAndSenderUserId())
         post("/messages", messagingController.sendMessage())
+
+        before("/messages?", requestFilter.handleValidToken())
         get("/messages", messagingController.messagesFromUser())
+
+
     }
 
 

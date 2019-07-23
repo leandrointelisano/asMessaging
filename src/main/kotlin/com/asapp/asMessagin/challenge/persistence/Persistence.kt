@@ -14,29 +14,28 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 /**
  * Persistence class that handles all the request from the services. It persists all the user data.
  */
 class Persistence(private val objectMapper: ObjectMapper) {
+    private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
     fun persistMessage(messageSender: Int, messageRecipient: Int, messageContent: MessageContent) =
         transaction {
-            val senderUser: User = user(messageSender) ?: throw APIException(
-                HttpStatus.NOT_FOUND_404,
-                "User not found for user ID $messageSender"
-            )
-            val recipientUser: User = user(messageRecipient)  ?: throw APIException(
-            HttpStatus.NOT_FOUND_404,
-            "User not found for user ID $messageSender"
-        )
+            LOGGER.info("Persisting message from userid $messageSender to userid $messageRecipient")
+            val senderUser: User = user(messageSender)
+            val recipientUser: User = user(messageRecipient)
             Message.new {
                 sender = senderUser
                 recipient = recipientUser
                 content = objectMapper.writeValueAsString(messageContent)
                 timestamp = Instant.now().toString()
                 messageNumber = countUserMessages(messageRecipient) + 1
+                LOGGER.info("Message persisted successfully")
+
             }
                 .let {
                     UserMessage(
@@ -49,7 +48,8 @@ class Persistence(private val objectMapper: ObjectMapper) {
 
     fun userMessages(userId: Int, from: Int, to: Int?): List<UserMessage> =
         transaction {
-            Message.find { Messages.recipient eq userId }.limitMessages(from, to).map { persistedMessage ->
+            LOGGER.info("Fetching all messages from userid $userId with limits(from $from to ${to?: "MAX"})")
+                Message.find { Messages.recipient eq userId }.limitMessages(from, to).map { persistedMessage ->
                 UserMessage(
                     id = persistedMessage.messageNumber,
                     sender = persistedMessage.sender.id.value,
@@ -67,7 +67,8 @@ class Persistence(private val objectMapper: ObjectMapper) {
 
     fun createUser(username: String, password: String): Int =
         transaction {
-            user(username, password)?.let { user -> (user.username == username).takeIf { it }?.let { user.id.value } }
+            LOGGER.info("Creating user $username")
+                user(username, password)?.let { user -> (user.username == username).takeIf { it }?.let { user.id.value } }
                 ?: User.new {
                     this.username = username
                     this.password = DigestUtils.shaHex(password)
@@ -78,7 +79,10 @@ class Persistence(private val objectMapper: ObjectMapper) {
         }
 
     private fun user(userId: Int) =
-        transaction { User.find { Users.id eq userId } }.firstOrNull()
+        transaction { User.find { Users.id eq userId } }.firstOrNull()?.let { it } ?: throw throw APIException(
+            HttpStatus.NOT_FOUND_404,
+            "User not found for user ID $userId"
+        )
 
     private fun user(username: String, password: String) =
         User.find {
@@ -94,17 +98,21 @@ class Persistence(private val objectMapper: ObjectMapper) {
 
     fun logUser(username: String, password: String): AuthenticatedUser =
         transaction {
+            LOGGER.info("Logging in user $username")
             user(username, password)?.let { user ->
                 alreadyLoggedUser(user.id.value)?.let { it } ?: transaction {
                     LoggedUser.new {
                         this.userId = user
                         this.token = RandomStringUtils.random(10, true, true)
+                        LOGGER.info("$username logged in successfully")
+
                     }
                 }
             }?.let {
                 AuthenticatedUser(
                     userId = it.userId.id.value,
                     token = it.token
+
                 )
             }
                 ?: throw UserLogException("Failed to authenticate user: $username. \n Please try with another credentials.")
@@ -114,6 +122,8 @@ class Persistence(private val objectMapper: ObjectMapper) {
         transaction {
             user(username, password)?.let { loggedUser ->
                 LoggedUser.find { UserLogin.userId eq loggedUser.id }.firstOrNull()?.let { LoggedUser[it.id].delete() }
+                LOGGER.info("$username logged out successfully")
+
             }
         }
 
@@ -130,10 +140,9 @@ class Persistence(private val objectMapper: ObjectMapper) {
 
     fun validToken(token: String, userId: Int): Boolean =
         transaction {
-            val user = user(userId)
             LoggedUser.find { (UserLogin.token eq token) }
                 .firstOrNull()
-                ?.validateSenderUser(userId)
+                ?.validateTokenOwner(userId)
                 ?.let { it } ?: false
 
         }
@@ -193,7 +202,7 @@ private fun SizedIterable<Persistence.Message>.limitMessages(from: Int, to: Int?
         ?: this.filter { it.messageNumber >= from }.toList()
 
 
-private fun Persistence.LoggedUser?.validateSenderUser(userId: Int): Boolean =
+private fun Persistence.LoggedUser?.validateTokenOwner(userId: Int): Boolean =
     this?.userId?.id?.value?.equals(userId) ?: false
 
 

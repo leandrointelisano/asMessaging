@@ -16,14 +16,27 @@ import spark.Response
  */
 class RequestFilter(private val authenticationService: AuthenticationService, private val objectMapper: ObjectMapper) {
 
-    fun handleToken() = Filter { req: Request, _: Response ->
+    fun handleTokenAndSenderUserId() = Filter { req: Request, _: Response ->
         val userMessage = objectMapper.readValue<UserMessagePost>(req.body(), UserMessagePost::class.java)
-        val token = requireNotNull(req.headers("token")) { "'token' header is required" }
-
-        if (!validToken(token, userMessage.sender)) {
+        if (!validToken(extractToken(req), userMessage.sender))
             throw UnauthorizedException("Invalid token")
-        }
+
+
     }
+
+    fun handleValidToken() = Filter { request: Request, _: Response ->
+        val recipient = requireNotNull(request.queryParams("recipient").toInt()) { "'recipient' param is required" }
+        if (!authenticationService.validToken(
+                extractToken(request),
+                recipient
+            )
+        ) throw UnauthorizedException("Invalid token")
+
+    }
+
+    private fun extractToken(request: Request): String =
+        requireNotNull(request.headers("token")) { "Token header is required" }
+
 
     private fun validToken(token: String, userId: Int) =
         authenticationService.validToken(token, userId)
