@@ -4,12 +4,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.asapp.asMessagin.challenge</groupId>
-    <artifactId>com.asapp.asMessagin.challenge</artifactId>
+    <groupId>com.asapp.asMessaging.challenge</groupId>
+    <artifactId>com.asapp.asMessaging.challenge</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>com.asapp.asMessagin.challenge com.asapp.asMessagin.challenge</name>
+    <name>com.asapp.asMessaging.challenge com.asapp.asMessaging.challenge</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
