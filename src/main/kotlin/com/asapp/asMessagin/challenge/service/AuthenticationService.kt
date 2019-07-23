@@ -11,7 +11,7 @@ import com.asapp.asMessagin.challenge.persistence.Persistence
 class AuthenticationService(private val persistence: Persistence) {
 
     fun loginUser(user: UserPostRequest) =
-        persistence.logUser(user.username, user.password)?.let { loggedUser ->
+        persistence.logUser(user.username, user.password).let { loggedUser ->
             LoggedUser(
                 id = loggedUser.userId,
                 token = loggedUser.token

@@ -19,14 +19,14 @@ import java.time.Instant
  */
 class Persistence(private val objectMapper: ObjectMapper) {
 
-    fun persistMessage(messageSender: Int, messageRecipient: Int, messageContent: String) =
+    fun persistMessage(messageSender: Int, messageRecipient: Int, messageContent: MessageContent) =
         transaction {
             val senderUser: User = user(messageSender)
             val recipientUser: User = user(messageRecipient)
             Message.new {
                 sender = senderUser
                 recipient = recipientUser
-                content = messageContent
+                content = objectMapper.writeValueAsString(messageContent)
                 timestamp = Instant.now().toString()
                 messageNumber = countUserMessages(messageRecipient) + 1
             }
@@ -84,7 +84,7 @@ class Persistence(private val objectMapper: ObjectMapper) {
         }.firstOrNull()
 
 
-    fun logUser(username: String, password: String): AuthenticatedUser? =
+    fun logUser(username: String, password: String): AuthenticatedUser =
         transaction {
             user(username, password)?.let { user ->
                 alreadyLoggedUser(user.id.value)?.let { it } ?: transaction {
@@ -146,7 +146,7 @@ class Persistence(private val objectMapper: ObjectMapper) {
 
     object UserLogin : IntIdTable() {
         val userId = reference("user", Users)
-        val token = varchar("token", length = 50)
+        val token = varchar("token", length = 50).uniqueIndex()
     }
 
     class User(id: EntityID<Int>) : IntEntity(id) {

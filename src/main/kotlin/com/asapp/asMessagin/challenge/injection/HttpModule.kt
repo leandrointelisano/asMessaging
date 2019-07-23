@@ -5,9 +5,11 @@ import com.asapp.asMessagin.challenge.persistence.Persistence
 import com.asapp.asMessagin.challenge.service.AuthenticationService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
+
 /**
  * Spark class used for injection of dependencies
  */
@@ -33,29 +35,23 @@ class HttpModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun exceptionHandler(
-        mapper: KotlinModule
-    ): ExceptionHandler = ExceptionHandler(
-        ObjectMapper().registerModule(mapper)
-    )
+    fun exceptionHandler(): ExceptionHandler = ExceptionHandler(jacksonObjectMapper())
 
     @Provides
     @Singleton
     fun requestFilter(
-        authenticationService: AuthenticationService,
-        mapper: KotlinModule
+        authenticationService: AuthenticationService
     ): RequestFilter = RequestFilter(
         authenticationService,
-        ObjectMapper().registerModule(mapper)
+        jacksonObjectMapper()
     )
 
     @Provides
     @Singleton
     fun appController(
-        mapper: KotlinModule,
         persistence: Persistence
     ): AppController = AppController(
         persistence,
-        ObjectMapper().registerModule(mapper)
+        jacksonObjectMapper()
     )
 }

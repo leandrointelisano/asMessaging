@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
+
 /**
  * Spark class used for injection of dependencies
  */
@@ -35,10 +36,8 @@ class ServiceModule : AbstractModule() {
     @Provides
     @Singleton
     fun messagingService(
-        persistence: Persistence,
-        mapper: KotlinModule
+        persistence: Persistence
     ): MessagingService = MessagingService(
-        persistence,
-        ObjectMapper().registerModule(mapper)
+        persistence
     )
 }
