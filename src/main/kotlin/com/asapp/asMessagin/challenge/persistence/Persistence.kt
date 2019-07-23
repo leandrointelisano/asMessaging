@@ -1,11 +1,13 @@
 package com.asapp.asMessagin.challenge.persistence
 
+import com.asapp.asMessagin.challenge.exception.APIException
 import com.asapp.asMessagin.challenge.exception.UserLogException
 import com.asapp.asMessagin.challenge.model.MessageContent
 import com.asapp.asMessagin.challenge.model.UserMessage
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.lang3.RandomStringUtils
+import org.eclipse.jetty.http.HttpStatus
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -21,8 +23,14 @@ class Persistence(private val objectMapper: ObjectMapper) {
 
     fun persistMessage(messageSender: Int, messageRecipient: Int, messageContent: MessageContent) =
         transaction {
-            val senderUser: User = user(messageSender)
-            val recipientUser: User = user(messageRecipient)
+            val senderUser: User = user(messageSender) ?: throw APIException(
+                HttpStatus.NOT_FOUND_404,
+                "User not found for user ID $messageSender"
+            )
+            val recipientUser: User = user(messageRecipient)  ?: throw APIException(
+            HttpStatus.NOT_FOUND_404,
+            "User not found for user ID $messageSender"
+        )
             Message.new {
                 sender = senderUser
                 recipient = recipientUser
@@ -70,7 +78,7 @@ class Persistence(private val objectMapper: ObjectMapper) {
         }
 
     private fun user(userId: Int) =
-        transaction { User[userId] }
+        transaction { User.find { Users.id eq userId } }.firstOrNull()
 
     private fun user(username: String, password: String) =
         User.find {
