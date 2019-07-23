@@ -17,7 +17,7 @@ import java.time.Instant
 /**
  * Persistence class that handles all the request from the services. It persists all the user data.
  */
-class UserPersistence(private val objectMapper: ObjectMapper) {
+class Persistence(private val objectMapper: ObjectMapper) {
 
     fun persistMessage(messageSender: Int, messageRecipient: Int, messageContent: String) =
         transaction {
@@ -179,13 +179,13 @@ class UserPersistence(private val objectMapper: ObjectMapper) {
     )
 }
 
-private fun SizedIterable<UserPersistence.Message>.limitMessages(from: Int, to: Int?): List<UserPersistence.Message> =
+private fun SizedIterable<Persistence.Message>.limitMessages(from: Int, to: Int?): List<Persistence.Message> =
     this.takeIf { !it.empty() }
         .let { messages -> to?.let { messages?.filter { message -> message.messageNumber in from..to } } }
         ?: this.filter { it.messageNumber >= from }.toList()
 
 
-private fun UserPersistence.LoggedUser?.validateSenderUser(userId: Int): Boolean =
+private fun Persistence.LoggedUser?.validateSenderUser(userId: Int): Boolean =
     this?.userId?.id?.value?.equals(userId) ?: false
 
 

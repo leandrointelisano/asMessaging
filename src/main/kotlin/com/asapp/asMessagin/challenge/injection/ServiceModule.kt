@@ -1,6 +1,6 @@
 package com.asapp.asMessagin.challenge.injection
 
-import com.asapp.asMessagin.challenge.persistence.UserPersistence
+import com.asapp.asMessagin.challenge.persistence.Persistence
 import com.asapp.asMessagin.challenge.service.AuthenticationService
 import com.asapp.asMessagin.challenge.service.MessagingService
 import com.asapp.asMessagin.challenge.service.UserService
@@ -19,7 +19,7 @@ class ServiceModule : AbstractModule() {
     @Provides
     @Singleton
     fun userService(
-        persistence: UserPersistence
+        persistence: Persistence
     ): UserService = UserService(
         persistence
     )
@@ -27,7 +27,7 @@ class ServiceModule : AbstractModule() {
     @Provides
     @Singleton
     fun logInService(
-        persistence: UserPersistence
+        persistence: Persistence
     ): AuthenticationService = AuthenticationService(
         persistence
     )
@@ -35,7 +35,7 @@ class ServiceModule : AbstractModule() {
     @Provides
     @Singleton
     fun messagingService(
-        persistence: UserPersistence,
+        persistence: Persistence,
         mapper: KotlinModule
     ): MessagingService = MessagingService(
         persistence,

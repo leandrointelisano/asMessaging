@@ -4,11 +4,9 @@ import com.asapp.asMessagin.challenge.injection.ControllerModule
 import com.asapp.asMessagin.challenge.injection.HttpModule
 import com.asapp.asMessagin.challenge.injection.PersistenceModule
 import com.asapp.asMessagin.challenge.injection.ServiceModule
-import com.asapp.asMessagin.challenge.persistence.UserPersistence
+import com.asapp.asMessagin.challenge.persistence.Persistence
 import com.google.inject.Guice
 import com.google.inject.Injector
-import com.google.inject.Key
-import com.google.inject.name.Names
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -42,7 +40,7 @@ class Main {
     fun run() {
         Database.connect("jdbc:sqlite:./data.db", "org.sqlite.JDBC")
 
-        transaction { SchemaUtils.create(UserPersistence.Users, UserPersistence.Messages, UserPersistence.UserLogin) }
+        transaction { SchemaUtils.create(Persistence.Users, Persistence.Messages, Persistence.UserLogin) }
 
         val injector = Guice.createInjector(
             HttpModule(),

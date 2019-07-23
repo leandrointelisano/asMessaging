@@ -20,10 +20,19 @@ class UserController(private val userService: UserService, private val objectMap
             throw BadRequestException("Invalid request body while creating a system user")
 
         }?.let { user ->
+            validatePasswordLength(user.password)
             userService.create(user).let { objectMapper.writeValueAsString(it) }
         }
 
 
+    }
+
+    private fun validatePasswordLength(password: String) {
+        (password.length < MAX_PASSWORD_LENGTH).takeIf { !it }?.let { throw BadRequestException("Password length exceeds 16 chars") }
+    }
+
+    companion object {
+        private const val MAX_PASSWORD_LENGTH = 16
     }
 
 

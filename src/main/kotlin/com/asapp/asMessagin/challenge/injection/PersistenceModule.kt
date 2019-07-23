@@ -1,6 +1,6 @@
 package com.asapp.asMessagin.challenge.injection
 
-import com.asapp.asMessagin.challenge.persistence.UserPersistence
+import com.asapp.asMessagin.challenge.persistence.Persistence
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.inject.AbstractModule
@@ -16,7 +16,7 @@ class PersistenceModule : AbstractModule() {
     @Singleton
     fun persistenceEngine(
         mapper: KotlinModule
-    ): UserPersistence = UserPersistence(
+    ): Persistence = Persistence(
         ObjectMapper().registerModule(mapper)
     )
 }

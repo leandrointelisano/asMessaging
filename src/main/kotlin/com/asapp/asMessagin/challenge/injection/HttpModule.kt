@@ -1,7 +1,7 @@
 package com.asapp.asMessagin.challenge.injection
 
 import com.asapp.asMessagin.challenge.controller.*
-import com.asapp.asMessagin.challenge.persistence.UserPersistence
+import com.asapp.asMessagin.challenge.persistence.Persistence
 import com.asapp.asMessagin.challenge.service.AuthenticationService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -53,9 +53,9 @@ class HttpModule : AbstractModule() {
     @Singleton
     fun appController(
         mapper: KotlinModule,
-        userPersistence: UserPersistence
+        persistence: Persistence
     ): AppController = AppController(
-        userPersistence,
+        persistence,
         ObjectMapper().registerModule(mapper)
     )
 }
