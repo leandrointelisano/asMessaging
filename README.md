@@ -15,7 +15,7 @@ Is a compact app, that allows sending and receiving messages using a REST API
 * Exposed
 * Jackson
 * SQLite
-* Log4j
+* Logback
 
 The intention of using this stack of apps, is to create a light-weight app, suitable 
 for microservices architecture. In this case this is a state app, but I´d preferred to have a stateless app with the logic
