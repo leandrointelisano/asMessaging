@@ -26,7 +26,7 @@ a centralized log.
 **How to use**
 1) Cloning GITHub repository
     `git clone git@github.com:leandrointelisano/asMessaging.git`
-     password: Asapp2019
+    
      
      Opening the project and running Main.kt (main() function)
 2) Recommended: java -jar com.asapp.asMessaging.challenge-1.0-SNAPSHOT-jar-with-dependencies.jar in a console (JRE 8 required) 
